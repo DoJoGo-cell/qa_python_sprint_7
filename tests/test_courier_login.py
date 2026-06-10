@@ -27,10 +27,19 @@ class TestCourierLogin:
         with allure.step('Проверка возврата сообщения с id курьера'):
             assert "id" in result and type(result["id"]) == int
 
-    @allure.title('Возврат собщения об ошибке при вводе в обязательные поля невалдиных данных')
+    @allure.title('Неудачная попытка авторизации курьера при вводе в обязательные поля невалидных данных')
+    @allure.description('Тест проверяет невозможность авторизации при вводе невалидных данных в обязательные поля login и password')
+    def test_courier_login_invalid_data_not_found(self):
+        with allure.step('Авторизация курьера с невалидными данными'):
+            response = CourierAPI.login(CoruierLoginData.INVALID_DATA)
+
+        with allure.step(f'Проверка возврата статус кода - {StatusCodes.NOT_FOUND}'):
+            assert response.status_code == StatusCodes.NOT_FOUND
+
+    @allure.title('Возврат собщения об ошибке при вводе в обязательные поля невалидных данных')
     @allure.description('Тест проверяет возврат сообщения об ошибке при вводе невалидных данных в обязательные поля login и password')
-    def test_courier_login_invalid_data_return_message_not_found(self, ):
-        with allure.step('Авторизация курьера с невалдиными данными'):
+    def test_courier_login_invalid_data_return_message_not_found(self):
+        with allure.step('Авторизация курьера с невалидными данными'):
             response = CourierAPI.login(CoruierLoginData.INVALID_DATA)
 
         with allure.step(f'Проверка возврата сообщения об ошибке - {CourierLoginMessages.NOT_FOUND}'):

@@ -39,13 +39,8 @@ def register_new_courier_and_autharization_and_return_data():
     print(f"Курьер {courier_id} удалён, статус: {response.status_code}")
     
 
-@pytest.fixture(scope='function', params=[
-    ["BLACK"],           
-    ["GRAY"],            
-    ["BLACK", "GRAY"],      
-    []     
-])
-def creating_order_with_different_colors_and_return_data(request):
+@pytest.fixture(scope='function')
+def creating_template_for_order_and_return_data():
 
     order_payload = {
         "firstName": generators.generate_random_string(10),
@@ -56,17 +51,21 @@ def creating_order_with_different_colors_and_return_data(request):
         "rentTime": 5,
         "deliveryDate": "2020-06-06",
         "comment": "Saske, come back to Konoha",
-        "color": request.param
+        "color": None
     }
 
-    order_result = OrderAPI.order(order_payload)
+    yield order_payload
 
-    if order_result.status_code != 201:
-        return None
+@pytest.fixture(scope='function')
+def order_cancel():
+
+    track = {}
     
-    order_track = order_result.json()
-
-    yield order_result.status_code, order_track
-
-    response = OrderAPI.cancel(order_track)
-    print(f"Заказ {order_track} удалён, статус: {response.status_code}")
+    def schedule_cancel(order_track):
+        track["value"] = order_track
+    
+    yield schedule_cancel
+    
+    if track["value"]:
+        response = OrderAPI.cancel(track["value"])
+        print(f"Заказ {track['value']} удалён, статус: {response.status_code}")
